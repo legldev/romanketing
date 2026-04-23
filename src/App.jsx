@@ -6,7 +6,6 @@ import {
   Facebook,
   Globe,
   Instagram,
-  Linkedin,
   Mail,
   MapPin,
   Menu,
@@ -93,10 +92,31 @@ const footerServices = [
   "Desarrollo de Website's"
 ];
 
-const footerCompany = ["About Us", "Our Team", "Case Studies", "Careers", "Contact"];
+const footerCompany = [
+  { label: "Nosotros", href: "#about" },
+  { label: "Casos de Estudio", href: "#case-studies" }
+];
 
 function Logo() {
   return <span className="brand-mark">Romanketing</span>;
+}
+
+function TikTokIcon(props) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      height="16"
+      viewBox="0 0 24 24"
+      width="16"
+      {...props}
+    >
+      <path
+        d="M14.5 3c.4 1.9 1.7 3.6 3.5 4.4a6.7 6.7 0 0 0 2.5.6v3.1a9.5 9.5 0 0 1-3-.7v5.8a6.3 6.3 0 1 1-6.3-6.3c.4 0 .8 0 1.1.1v3.2a3.1 3.1 0 1 0 2 3V3h.2Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
 function AuditForm({ title, description, buttonLabel, compact = false }) {
@@ -298,19 +318,31 @@ function App() {
         <div className="container footer-grid">
           <div className="footer-brand">
             <Logo />
-            <p>#RompemosElAlgoritmo</p>
+            <p>#RompemosConElAlgoritmo</p>
             <div className="social-links" aria-label="Redes sociales">
-              <a href="https://facebook.com" aria-label="Facebook">
+              <a
+                href="https://www.facebook.com/profile.php?id=61581816820600"
+                aria-label="Facebook"
+                rel="noreferrer"
+                target="_blank"
+              >
                 <Facebook size={16} />
               </a>
-              <a href="https://linkedin.com" aria-label="LinkedIn">
-                <Linkedin size={16} />
-              </a>
-              <a href="https://instagram.com" aria-label="Instagram">
+              <a
+                href="https://www.instagram.com/somos.romanketing/"
+                aria-label="Instagram"
+                rel="noreferrer"
+                target="_blank"
+              >
                 <Instagram size={16} />
               </a>
-              <a href="mailto:clientes@romanketing.com" aria-label="Email">
-                <Mail size={16} />
+              <a
+                href="https://www.tiktok.com/@somos.romanketing"
+                aria-label="TikTok"
+                rel="noreferrer"
+                target="_blank"
+              >
+                <TikTokIcon />
               </a>
             </div>
           </div>
@@ -327,18 +359,18 @@ function App() {
           </div>
 
           <div>
-            <h4>Compañía</h4>
+            <h4>Empresa</h4>
             <ul>
               {footerCompany.map((item) => (
-                <li key={item}>
-                  <a href="#top">{item}</a>
+                <li key={item.label}>
+                  <a href={item.href}>{item.label}</a>
                 </li>
               ))}
             </ul>
           </div>
 
           <div>
-            <h4>Get in Touch</h4>
+            <h4>Hablemos</h4>
             <ul className="contact-list">
               <li>
                 <MapPin size={15} />
