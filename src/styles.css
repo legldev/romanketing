@@ -73,13 +73,6 @@ img {
 .brand-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-}
-
-.brand-logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
 }
 
 .brand-mark {
@@ -674,18 +667,9 @@ img {
   padding-top: 52px;
 }
 
-.site-footer .brand-lockup {
-  gap: 14px;
-}
-
 .site-footer .brand-mark {
   color: #fff;
   font-size: 2.15rem;
-}
-
-.site-footer .brand-logo {
-  filter: brightness(0) saturate(100%) invert(99%) sepia(6%) saturate(529%)
-    hue-rotate(311deg) brightness(121%) contrast(100%);
 }
 
 .footer-grid {
@@ -861,15 +845,6 @@ img {
 @media (max-width: 720px) {
   .container {
     width: min(calc(100% - 24px), var(--container));
-  }
-
-  .brand-lockup {
-    gap: 10px;
-  }
-
-  .brand-logo {
-    width: 40px;
-    height: 40px;
   }
 
   .brand-mark {
