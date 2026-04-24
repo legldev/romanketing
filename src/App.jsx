@@ -1,86 +1,36 @@
 import { useState } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Code2,
-  Facebook,
-  Globe,
-  Instagram,
-  Mail,
-  MapPin,
-  Menu,
-  Megaphone,
-  Phone,
-  Search,
-  TrendingUp,
-  X
-} from "lucide-react";
+import { Facebook, Instagram, Mail, MapPin, Phone, X, Menu } from "lucide-react";
+import { AuditForm } from "./components/AuditForm";
+import { BrandLogo } from "./components/BrandLogo";
+import { MetricCounter } from "./components/MetricCounter";
+import { ServicesSection } from "./components/ServicesSection";
 import teamImage from "./assets/team-meeting.jpg";
 
 const services = [
   {
     title: "Optimización SEO",
     description:
-      "Aumenta la visibilidad orgánica e impulsa tráfico de alta calidad, para motores de búsqueda respaldados por datos.",
-    icon: Search
+      "Aumenta la visibilidad orgánica e impulsa tráfico de alta calidad, para motores de búsqueda respaldados por datos."
   },
   {
     title: "Paid Media",
     description:
-      "Maximiza el ROI con campañas publicitarias segmentadas en las redes de Google, Meta y TikTok.",
-    icon: Megaphone
+      "Maximiza el ROI con campañas publicitarias segmentadas en las redes de Google, Meta y TikTok."
   },
   {
     title: "Desarrollo estratégico",
     description:
-      "Análisis de mercado exhaustivo y hojas de ruta de crecimiento adaptadas a tus objetivos empresariales.",
-    icon: TrendingUp
+      "Análisis de mercado exhaustivo y hojas de ruta de crecimiento adaptadas a tus objetivos empresariales."
   },
   {
     title: "Redes Sociales",
     description:
-      "Construye una comunidad sólida y aumenta el engagement con contenido estratégico y gestión profesional.",
-    icon: Globe
+      "Construye una comunidad sólida y aumenta el engagement con contenido estratégico y gestión profesional."
   },
   {
     title: "Desarrollo Web",
     description:
-      "Sitios web modernos, rápidos y optimizados para conversiones que reflejan la identidad de tu marca.",
-    icon: Code2
-  }
-];
-
-const formFields = [
-  {
-    label: "Nombre",
-    name: "name",
-    placeholder: "John Doe",
-    type: "text"
-  },
-  {
-    label: "Teléfono",
-    name: "phone",
-    placeholder: "+57 300 000 0000",
-    type: "tel"
-  },
-  {
-    label: "Email",
-    name: "email",
-    placeholder: "john@company.com",
-    type: "email",
-    full: true
-  },
-  {
-    label: "Nombre de empresa",
-    name: "company",
-    placeholder: "Empresa S.A.S",
-    type: "text"
-  },
-  {
-    label: "Cargo",
-    name: "role",
-    placeholder: "Gerente de Marketing",
-    type: "text"
+      "Sitios web modernos, rápidos y optimizados para conversiones que reflejan la identidad de tu marca."
   }
 ];
 
@@ -97,9 +47,20 @@ const footerCompany = [
   { label: "Casos de Estudio", href: "#case-studies" }
 ];
 
-function Logo() {
-  return <span className="brand-mark">Romanketing</span>;
-}
+const metrics = [
+  {
+    id: "client-retention",
+    value: 98,
+    suffix: "%",
+    label: "Retención de clientes."
+  },
+  {
+    id: "successful-campaigns",
+    value: 250,
+    suffix: "+",
+    label: "Campañas exitosas."
+  }
+];
 
 function TikTokIcon(props) {
   return (
@@ -119,51 +80,6 @@ function TikTokIcon(props) {
   );
 }
 
-function AuditForm({ title, description, buttonLabel, compact = false }) {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-  };
-
-  return (
-    <form
-      className={`audit-form ${compact ? "audit-form-compact" : ""}`}
-      onSubmit={handleSubmit}
-    >
-      <div className="form-header">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
-      <div className="form-grid">
-        {formFields.map((field) => (
-          <label
-            className={field.full ? "field field-full" : "field"}
-            key={field.name}
-          >
-            <span>{field.label}</span>
-            <input name={field.name} placeholder={field.placeholder} type={field.type} />
-          </label>
-        ))}
-        <label className="field field-full">
-          <span>Interesado en</span>
-          <div className="select-wrap">
-            <select defaultValue="Optimización SEO" name="service">
-              <option>Optimización SEO</option>
-              <option>Paid Media</option>
-              <option>Desarrollo estratégico</option>
-              <option>Redes Sociales</option>
-              <option>Desarrollo Web</option>
-            </select>
-            <ChevronDown aria-hidden="true" size={18} />
-          </div>
-        </label>
-      </div>
-      <button className="primary-button form-submit" type="submit">
-        {buttonLabel}
-      </button>
-    </form>
-  );
-}
-
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -172,8 +88,9 @@ function App() {
       <header className="site-header">
         <div className="container nav-row">
           <a className="logo-link" href="#top" aria-label="Ir al inicio">
-            <Logo />
+            <BrandLogo />
           </a>
+
           <nav className={`site-nav ${menuOpen ? "site-nav-open" : ""}`}>
             <a href="#services" onClick={() => setMenuOpen(false)}>
               Servicios
@@ -188,6 +105,7 @@ function App() {
               Contáctanos
             </a>
           </nav>
+
           <button
             aria-expanded={menuOpen}
             aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
@@ -205,9 +123,10 @@ function App() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <h1>
-                Impulsa tu marca
-                <br />
-                con <span>Marketing</span> Estratégico
+                <span className="hero-line">Impulsa tu marca</span>
+                <span className="hero-line hero-line-accent">
+                  con <span>Marketing</span> Estratégico
+                </span>
               </h1>
               <p>
                 Combinamos la visión creativa con una estrategia basada en datos para
@@ -216,7 +135,7 @@ function App() {
               </p>
               <div className="hero-actions">
                 <a className="primary-button" href="#services">
-                  Explorar Servicios <ChevronRight size={18} />
+                  Explorar Servicios
                 </a>
                 <a className="secondary-button" href="#about">
                   ¿Quiénes Somos?
@@ -227,41 +146,16 @@ function App() {
             <div className="hero-form-card" id="contact">
               <AuditForm
                 compact
-                title="Obtén tu auditoría gratuita"
-                description="Completa el formulario y nuestro equipo se pondrá en contacto contigo"
                 buttonLabel="SOLICITAR AUDITORÍA"
+                description="Completa el formulario y nuestro equipo se pondrá en contacto contigo"
+                source="hero"
+                title="Obtén tu auditoría gratuita"
               />
             </div>
           </div>
         </section>
 
-        <section className="services-section" id="services">
-          <div className="container">
-            <div className="section-heading">
-              <span>NUESTRA EXPERIENCIA</span>
-              <h2>Soluciones digitales integrales</h2>
-              <div className="section-accent" />
-            </div>
-
-            <div className="services-grid">
-              {services.map((service) => {
-                const Icon = service.icon;
-                return (
-                  <article className="service-card" key={service.title}>
-                    <div className="service-icon">
-                      <Icon size={22} />
-                    </div>
-                    <h3>{service.title}</h3>
-                    <p>{service.description}</p>
-                    <a href="#contact">
-                      Saber más <ChevronRight size={16} />
-                    </a>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <ServicesSection services={services} />
 
         <section className="about-section" id="about">
           <div className="container about-grid">
@@ -288,14 +182,16 @@ function App() {
               </p>
 
               <div className="stats-grid" id="case-studies">
-                <div>
-                  <strong>98%</strong>
-                  <span>Retención de clientes.</span>
-                </div>
-                <div>
-                  <strong>250+</strong>
-                  <span>Campañas exitosas.</span>
-                </div>
+                {metrics.map((metric) => (
+                  <div key={metric.id}>
+                    <MetricCounter
+                      id={metric.id}
+                      suffix={metric.suffix}
+                      value={metric.value}
+                    />
+                    <span>{metric.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -305,9 +201,10 @@ function App() {
           <div className="container cta-card-wrap">
             <div className="cta-card">
               <AuditForm
-                title="¿Listo para transformar tu negocio?"
-                description="Completa tus datos para recibir una auditoría personalizada y empezar a crecer estratégicamente."
                 buttonLabel="ENVIAR SOLICITUD DE AUDITORÍA"
+                description="Completa tus datos para recibir una auditoría personalizada y empezar a crecer estratégicamente."
+                source="footer"
+                title="¿Listo para transformar tu negocio?"
               />
             </div>
           </div>
@@ -317,7 +214,7 @@ function App() {
       <footer className="site-footer">
         <div className="container footer-grid">
           <div className="footer-brand">
-            <Logo />
+            <BrandLogo footer />
             <p>#RompemosConElAlgoritmo</p>
             <div className="social-links" aria-label="Redes sociales">
               <a

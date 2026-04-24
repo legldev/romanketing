@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "googleapis": "^171.4.0",
     "lucide-react": "^0.542.0",
+    "nodemailer": "^8.0.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
