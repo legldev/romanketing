@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Facebook, Instagram, Mail, MapPin, Phone, X, Menu } from "lucide-react";
 import { AuditForm } from "./components/AuditForm";
 import { BrandLogo } from "./components/BrandLogo";
@@ -62,6 +62,9 @@ const metrics = [
   }
 ];
 
+const whatsappHref =
+  "https://wa.me/573102244517?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Romanketing.";
+
 function TikTokIcon(props) {
   return (
     <svg
@@ -77,6 +80,71 @@ function TikTokIcon(props) {
         fill="currentColor"
       />
     </svg>
+  );
+}
+
+function WhatsAppIcon(props) {
+  return (
+    <svg
+      aria-hidden="true"
+      fill="none"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        d="M20.5 11.9A8.5 8.5 0 0 1 7.93 19.4L3.5 20.5l1.14-4.28A8.5 8.5 0 1 1 20.5 11.9Z"
+        fill="currentColor"
+      />
+      <path
+        d="M16.72 14.1c-.18-.09-1.07-.53-1.24-.59-.17-.06-.3-.09-.42.1-.12.18-.48.59-.58.7-.1.12-.21.13-.39.05-.18-.09-.77-.28-1.47-.88-.54-.48-.9-1.06-1-1.24-.1-.18 0-.27.08-.36.08-.08.18-.21.27-.32.09-.1.12-.18.18-.3.06-.12.03-.22-.02-.31-.05-.09-.42-1.01-.58-1.39-.15-.36-.31-.31-.42-.31h-.36c-.12 0-.31.05-.48.23-.17.18-.64.63-.64 1.53 0 .9.66 1.77.75 1.89.09.12 1.3 1.98 3.14 2.78.44.19.79.31 1.06.39.45.14.85.12 1.17.07.36-.05 1.07-.44 1.22-.87.15-.43.15-.8.1-.87-.04-.07-.16-.11-.34-.2Z"
+        fill="#fff"
+      />
+    </svg>
+  );
+}
+
+function WhatsAppFloatingButton() {
+  const [isPromptVisible, setIsPromptVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIsPromptVisible(true);
+    }, 7000);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="whatsapp-floating-wrap">
+      <div className={`whatsapp-prompt ${isPromptVisible ? "whatsapp-prompt-visible" : ""}`}>
+        <a
+          className="whatsapp-prompt-link"
+          href={whatsappHref}
+          rel="noreferrer"
+          target="_blank"
+        >
+          Contacta con nosotros
+        </a>
+        <button
+          aria-label="Cerrar globo de WhatsApp"
+          className="whatsapp-prompt-close"
+          onClick={() => setIsPromptVisible(false)}
+          type="button"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      <a
+        aria-label="Abrir conversación de WhatsApp"
+        className="whatsapp-floating-button"
+        href={whatsappHref}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <WhatsAppIcon className="whatsapp-floating-icon" />
+      </a>
+    </div>
   );
 }
 
@@ -123,9 +191,9 @@ function App() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <h1>
-                <span className="hero-line">Impulsa tu marca</span>
+                <span className="hero-line">Impulsa tu marca con</span>
                 <span className="hero-line hero-line-accent">
-                  con <span>Marketing</span> Estratégico
+                  <span>Marketing</span> Estratégico
                 </span>
               </h1>
               <p>
@@ -165,7 +233,7 @@ function App() {
 
             <div className="about-copy">
               <h2>
-                Mas que una agencia,
+                Más que una agencia,
                 <br />
                 Somos Aliados
               </h2>
@@ -294,6 +362,8 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <WhatsAppFloatingButton />
     </div>
   );
 }

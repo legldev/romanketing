@@ -11,7 +11,27 @@ const iconByTitle = {
 
 export function ServicesSection({ services }) {
   const cardRefs = useRef([]);
+  const snapTimeoutRef = useRef(null);
+  const isProgrammaticSnapRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const snapToCard = useEffectEvent((index, behavior = "smooth") => {
+    const card = cardRefs.current[index];
+
+    if (!card) {
+      return;
+    }
+
+    isProgrammaticSnapRef.current = true;
+    card.scrollIntoView({
+      behavior,
+      block: "nearest",
+      inline: "start"
+    });
+    window.setTimeout(() => {
+      isProgrammaticSnapRef.current = false;
+    }, 220);
+  });
 
   const handleScroll = useEffectEvent((event) => {
     if (window.innerWidth > 720) {
@@ -38,14 +58,20 @@ export function ServicesSection({ services }) {
     });
 
     setActiveIndex(nextIndex);
+
+    window.clearTimeout(snapTimeoutRef.current);
+
+    if (isProgrammaticSnapRef.current) {
+      return;
+    }
+
+    snapTimeoutRef.current = window.setTimeout(() => {
+      snapToCard(nextIndex);
+    }, 120);
   });
 
   const scrollToCard = (index) => {
-    cardRefs.current[index]?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "start"
-    });
+    snapToCard(index);
   };
 
   return (
