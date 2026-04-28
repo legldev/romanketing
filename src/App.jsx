@@ -62,8 +62,12 @@ const metrics = [
   }
 ];
 
+const mapsHref =
+  "https://www.google.com/maps/search/?api=1&query=Calle+94+%2316-29%2C+Bogot%C3%A1+D.C.%2C+Cundinamarca%2C+Colombia";
+const phoneHref = "tel:+573102244517";
+const mailHref = "mailto:clientes@romanketing.com";
 const whatsappHref =
-  "https://wa.me/573102244517?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Romanketing.";
+  "https://wa.me/573102244517?text=Hola%2C%20los%20vi%20en%20la%20website.%20Necesito%20ayuda%20con...";
 
 function TikTokIcon(props) {
   return (
@@ -272,7 +276,12 @@ function App() {
                 buttonLabel="ENVIAR SOLICITUD DE AUDITORÍA"
                 description="Completa tus datos para recibir una auditoría personalizada y empezar a crecer estratégicamente."
                 source="footer"
-                title="¿Listo para transformar tu negocio?"
+                title={
+                  <>
+                    <span className="form-title-line">¿Listo para transformar</span>
+                    <span className="form-title-line">tu negocio?</span>
+                  </>
+                }
               />
             </div>
           </div>
@@ -338,16 +347,22 @@ function App() {
             <h4>Hablemos</h4>
             <ul className="contact-list">
               <li>
-                <MapPin size={15} />
-                <span>Calle 94 #16-29; Bogotá D.C.; Cundinamarca; Colombia.</span>
+                <a href={mapsHref} rel="noreferrer" target="_blank">
+                  <MapPin size={15} />
+                  <span>Calle 94 #16-29; Bogotá D.C.; Cundinamarca; Colombia.</span>
+                </a>
               </li>
               <li>
-                <Phone size={15} />
-                <span>+57 310 224 4517</span>
+                <a href={phoneHref}>
+                  <Phone size={15} />
+                  <span>+57 310 224 4517</span>
+                </a>
               </li>
               <li>
-                <Mail size={15} />
-                <span>clientes@romanketing.com</span>
+                <a href={mailHref}>
+                  <Mail size={15} />
+                  <span>clientes@romanketing.com</span>
+                </a>
               </li>
             </ul>
           </div>

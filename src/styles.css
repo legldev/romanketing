@@ -303,6 +303,10 @@ img {
   color: var(--navy);
 }
 
+.form-title-line {
+  display: block;
+}
+
 .hero-form-card .form-header h2 {
   font-size: clamp(2rem, 2.2vw, 2.35rem);
 }
@@ -735,15 +739,28 @@ img {
 }
 
 .contact-list li {
+  margin-top: 0;
+}
+
+.contact-list li + li {
+  margin-top: 12px;
+}
+
+.contact-list a {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  width: 100%;
 }
 
 .contact-list svg {
   flex: none;
   margin-top: 3px;
   color: var(--gold-soft);
+}
+
+.contact-list a:hover span {
+  color: #fff;
 }
 
 .footer-bottom {
@@ -1008,6 +1025,11 @@ img {
     line-height: 0.95;
   }
 
+  .cta-card .form-header h2 {
+    max-width: 11ch;
+    margin-inline: auto;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -1070,14 +1092,14 @@ img {
   }
 
   .about-image-wrap {
-    max-width: 320px;
+    max-width: 272px;
     margin: 0 auto;
   }
 
   .about-copy h2 {
-    font-size: clamp(2.05rem, 10.2vw, 3rem);
+    font-size: clamp(1.82rem, 9.2vw, 2.6rem);
     line-height: 0.98;
-    max-width: 8.6ch;
+    max-width: 12ch;
   }
 
   .about-copy p {
@@ -1167,11 +1189,11 @@ img {
   }
 
   .about-image-wrap {
-    max-width: 286px;
+    max-width: 248px;
   }
 
   .about-copy h2 {
-    max-width: 8.2ch;
+    max-width: 11.2ch;
   }
 
   .stats-grid strong {
