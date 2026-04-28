@@ -50,8 +50,8 @@ export function TurnstileWidget({
   theme = "light"
 }) {
   const containerRef = useRef(null);
-  const handleSuccess = useEffectEvent((token) => onSuccess?.(token));
-  const handleError = useEffectEvent(() => onError?.());
+  const handleSuccess = useEffectEvent(onSuccess);
+  const handleError = useEffectEvent(onError);
 
   useEffect(() => {
     if (!siteKey || !containerRef.current) {
@@ -73,14 +73,14 @@ export function TurnstileWidget({
           language,
           size,
           "response-field": false,
-          callback: (token) => handleSuccess(token),
-          "expired-callback": () => handleError(),
-          "timeout-callback": () => handleError(),
-          "error-callback": () => handleError()
+          callback: (token) => handleSuccess?.(token),
+          "expired-callback": () => handleError?.(),
+          "timeout-callback": () => handleError?.(),
+          "error-callback": () => handleError?.()
         });
       })
       .catch(() => {
-        handleError();
+        handleError?.();
       });
 
     return () => {
@@ -90,7 +90,7 @@ export function TurnstileWidget({
         window.turnstile.remove(widgetId);
       }
     };
-  }, [handleError, handleSuccess, language, siteKey, size, theme]);
+  }, [language, siteKey, size, theme]);
 
   return <div className="turnstile-widget" ref={containerRef} />;
 }
