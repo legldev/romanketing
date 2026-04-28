@@ -3,7 +3,18 @@ import { ChevronDown } from "lucide-react";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 const leadEndpoint = import.meta.env.VITE_LEAD_ENDPOINT || "/api/lead";
-const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
+const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
+const configuredTurnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
+const isLocalTurnstileHost =
+  typeof window !== "undefined" &&
+  ["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname);
+const useLocalTurnstileTestKey =
+  import.meta.env.DEV &&
+  isLocalTurnstileHost &&
+  import.meta.env.VITE_TURNSTILE_ALLOW_LOCAL_PRODUCTION !== "true";
+const turnstileSiteKey = useLocalTurnstileTestKey
+  ? TURNSTILE_TEST_SITE_KEY
+  : configuredTurnstileSiteKey;
 
 const fieldDefinitions = [
   {
@@ -246,7 +257,9 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
         </div>
       ) : import.meta.env.DEV ? (
         <p className="form-helper">
-          Falta configurar `VITE_TURNSTILE_SITE_KEY` con la site key publica de Cloudflare Turnstile.
+          {useLocalTurnstileTestKey
+            ? "Turnstile esta usando la site key oficial de prueba para localhost."
+            : "Falta configurar `VITE_TURNSTILE_SITE_KEY` con la site key publica de Cloudflare Turnstile."}
         </p>
       ) : null}
 

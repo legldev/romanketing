@@ -878,8 +878,9 @@ img {
 }
 
 .whatsapp-floating-icon {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 @keyframes whatsapp-pulse {
@@ -1163,8 +1164,8 @@ img {
   }
 
   .whatsapp-floating-icon {
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
   }
 }
 

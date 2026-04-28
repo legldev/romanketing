@@ -5,6 +5,7 @@ import { BrandLogo } from "./components/BrandLogo";
 import { MetricCounter } from "./components/MetricCounter";
 import { ServicesSection } from "./components/ServicesSection";
 import teamImage from "./assets/team-meeting.jpg";
+import whatsappLogo from "./assets/whatsapp-logo.png";
 
 const services = [
   {
@@ -87,26 +88,6 @@ function TikTokIcon(props) {
   );
 }
 
-function WhatsAppIcon(props) {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      viewBox="0 0 24 24"
-      {...props}
-    >
-      <path
-        d="M19.05 4.91A9.82 9.82 0 0 0 3.64 16.66L2.4 21.21l4.66-1.22a9.81 9.81 0 0 0 4.69 1.19 9.85 9.85 0 0 0 9.85-9.82 9.76 9.76 0 0 0-2.55-6.45Z"
-        fill="currentColor"
-      />
-      <path
-        d="M11.75 19.52a8.14 8.14 0 0 1-4.15-1.13l-.3-.18-2.77.73.74-2.7-.2-.31a8.18 8.18 0 1 1 6.68 3.59Zm4.48-6.12c-.24-.12-1.41-.7-1.64-.78-.22-.08-.38-.12-.55.12-.16.24-.62.78-.76.95-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.17-.7-.63-1.18-1.4-1.32-1.64-.14-.24-.02-.37.1-.49.1-.1.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.32-.75-1.8-.2-.48-.4-.42-.55-.43h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.24 1.01.38 1.35.49.57.18 1.09.15 1.5.09.46-.07 1.41-.58 1.61-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"
-        fill="#fff"
-      />
-    </svg>
-  );
-}
-
 function WhatsAppFloatingButton() {
   const [isPromptVisible, setIsPromptVisible] = useState(false);
 
@@ -146,7 +127,11 @@ function WhatsAppFloatingButton() {
         rel="noreferrer"
         target="_blank"
       >
-        <WhatsAppIcon className="whatsapp-floating-icon" />
+        <img
+          alt="WhatsApp"
+          className="whatsapp-floating-icon"
+          src={whatsappLogo}
+        />
       </a>
     </div>
   );

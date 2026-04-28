@@ -4,6 +4,7 @@ import { google } from "googleapis";
 
 const defaultRecipientEmail = process.env.LEAD_RECIPIENT_EMAIL || "clientes@romanketing.com";
 const sheetName = process.env.GOOGLE_SHEET_TAB || "Leads";
+const TURNSTILE_TEST_SECRET_KEY = "1x0000000000000000000000000000000AA";
 const sheetHeader = [
   "Fecha de envío",
   "Origen",
@@ -109,16 +110,23 @@ function getRemoteIp(headers = {}, explicitIp = "") {
 }
 
 async function verifyTurnstileToken(token, remoteIp) {
-  if (!process.env.TURNSTILE_SECRET_KEY) {
+  const useLocalTurnstileTestKey =
+    process.env.NODE_ENV !== "production" &&
+    process.env.TURNSTILE_ALLOW_LOCAL_PRODUCTION !== "true";
+  const secretKey = useLocalTurnstileTestKey
+    ? process.env.TURNSTILE_DEV_SECRET_KEY || TURNSTILE_TEST_SECRET_KEY
+    : process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secretKey) {
     return { ok: true };
   }
 
   if (!token) {
-    return { ok: false };
+    return { ok: false, errorCodes: ["missing-input-response"] };
   }
 
   const formData = new URLSearchParams();
-  formData.set("secret", process.env.TURNSTILE_SECRET_KEY);
+  formData.set("secret", secretKey);
   formData.set("response", token);
 
   if (remoteIp) {
@@ -135,7 +143,10 @@ async function verifyTurnstileToken(token, remoteIp) {
 
   const payload = await response.json();
 
-  return { ok: Boolean(payload.success) };
+  return {
+    ok: Boolean(payload.success),
+    errorCodes: payload["error-codes"] || []
+  };
 }
 
 function ensureInternalConfig() {
@@ -366,9 +377,14 @@ export async function handleLeadRequest({ method, headers, body, ip }) {
   );
 
   if (!captchaCheck.ok) {
+    const detail =
+      process.env.NODE_ENV !== "production" && captchaCheck.errorCodes?.length
+        ? ` (${captchaCheck.errorCodes.join(", ")})`
+        : "";
+
     return jsonResponse(400, {
       ok: false,
-      message: "No pudimos validar el captcha."
+      message: `No pudimos validar el captcha.${detail}`
     });
   }
 
