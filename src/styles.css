@@ -401,42 +401,49 @@ img {
   padding-right: 40px;
 }
 
-.captcha-shell {
+.captcha-block {
   margin-top: 18px;
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
 }
 
-.captcha-slot {
-  min-height: 65px;
-  width: 100%;
-}
-
-.captcha-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-.captcha-retry {
-  border: 0;
-  background: transparent;
-  color: var(--navy);
-  font-size: 0.88rem;
+.captcha-block__title {
+  margin: 0 0 12px;
   font-weight: 800;
-  cursor: pointer;
-  padding: 0;
-  white-space: nowrap;
+  color: var(--navy);
+}
+
+.turnstile-widget {
+  display: flex;
+  justify-content: center;
+  min-height: 68px;
+  max-width: 100%;
+}
+
+.turnstile-widget > div {
+  max-width: 100%;
+}
+
+.turnstile-widget iframe {
+  max-width: 100%;
 }
 
 .form-helper,
+.form-note,
 .form-status {
   margin: 14px 0 0;
   font-size: 0.9rem;
 }
 
-.form-helper {
+.form-helper,
+.form-note {
   color: var(--text-soft);
+}
+
+.form-note--warning {
+  color: var(--error);
 }
 
 .form-status-success {
@@ -901,6 +908,7 @@ img {
   width: 34px;
   height: 34px;
   object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 @keyframes whatsapp-pulse {
@@ -1062,14 +1070,13 @@ img {
     padding: 0.64rem 0.82rem;
   }
 
-  .captcha-slot {
-    min-height: 78px;
-    overflow-x: auto;
+  .captcha-block {
+    padding: 14px;
   }
 
-  .captcha-meta {
-    flex-direction: column;
-    align-items: flex-start;
+  .turnstile-widget {
+    justify-content: flex-start;
+    overflow-x: auto;
   }
 
   .services-section {

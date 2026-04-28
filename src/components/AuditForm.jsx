@@ -1,20 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 const leadEndpoint = import.meta.env.VITE_LEAD_ENDPOINT || "/api/lead";
-const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
-const configuredTurnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
-const isLocalTurnstileHost =
-  typeof window !== "undefined" &&
-  ["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname);
-const useLocalTurnstileTestKey =
-  import.meta.env.DEV &&
-  isLocalTurnstileHost &&
-  import.meta.env.VITE_TURNSTILE_ALLOW_LOCAL_PRODUCTION !== "true";
-const turnstileSiteKey = useLocalTurnstileTestKey
-  ? TURNSTILE_TEST_SITE_KEY
-  : configuredTurnstileSiteKey;
+const captchaSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
 
 const fieldDefinitions = [
   {
@@ -75,7 +64,15 @@ const initialValues = {
   website: ""
 };
 
-function validateForm(values, captchaToken) {
+function getInitialCaptchaSize() {
+  if (typeof window === "undefined") {
+    return "flexible";
+  }
+
+  return window.matchMedia("(max-width: 560px)").matches ? "compact" : "flexible";
+}
+
+function validateForm(values) {
   const nextErrors = {};
 
   if (!values.name.trim()) {
@@ -94,42 +91,87 @@ function validateForm(values, captchaToken) {
     nextErrors.email = "Ingresa un email válido.";
   }
 
-  if (turnstileSiteKey && !captchaToken) {
-    nextErrors.captcha = "Completa el captcha para enviar el formulario.";
-  }
-
   return nextErrors;
 }
 
 export function AuditForm({ title, description, buttonLabel, compact = false, source }) {
+  const isCaptchaConfigured = Boolean(captchaSiteKey);
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ type: "idle", message: "" });
   const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaResetKey, setCaptchaResetKey] = useState(0);
-  const [captchaIssue, setCaptchaIssue] = useState("");
+  const [captchaVersion, setCaptchaVersion] = useState(0);
+  const [captchaSize, setCaptchaSize] = useState(getInitialCaptchaSize);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 560px)");
+    const syncCaptchaSize = (event) => {
+      setCaptchaSize(event.matches ? "compact" : "flexible");
+    };
+
+    setCaptchaSize(mediaQuery.matches ? "compact" : "flexible");
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", syncCaptchaSize);
+
+      return () => {
+        mediaQuery.removeEventListener("change", syncCaptchaSize);
+      };
+    }
+
+    mediaQuery.addListener(syncCaptchaSize);
+
+    return () => {
+      mediaQuery.removeListener(syncCaptchaSize);
+    };
+  }, []);
+
+  const resetCaptcha = () => {
+    setCaptchaToken("");
+    setCaptchaVersion((current) => current + 1);
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((current) => ({ ...current, [name]: value }));
-    setErrors((current) => ({ ...current, [name]: "" }));
-    setStatus({ type: "idle", message: "" });
-  };
+    setErrors((current) => ({ ...current, [name]: "", captcha: "" }));
 
-  const resetCaptcha = () => {
-    setCaptchaToken("");
-    setCaptchaIssue("");
-    setErrors((current) => ({ ...current, captcha: "" }));
-    setCaptchaResetKey((current) => current + 1);
+    if (status.type !== "idle") {
+      setStatus({ type: "idle", message: "" });
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const formErrors = validateForm(values, captchaToken);
+    const formErrors = validateForm(values);
 
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+      return;
+    }
+
+    if (!isCaptchaConfigured) {
+      setStatus({
+        type: "error",
+        message: "El CAPTCHA todavía no está configurado."
+      });
+      return;
+    }
+
+    if (!captchaToken) {
+      setErrors((current) => ({
+        ...current,
+        captcha: "Completa el CAPTCHA antes de enviar."
+      }));
+      setStatus({
+        type: "error",
+        message: "Completa el CAPTCHA antes de enviar."
+      });
       return;
     }
 
@@ -144,32 +186,36 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
         body: JSON.stringify({
           ...values,
           source,
-          captchaToken
+          token: captchaToken
         })
       });
 
-      const payload = await response.json();
+      const payload = await response.json().catch(() => ({}));
 
       if (!response.ok) {
+        if (payload.errors) {
+          setErrors((current) => ({ ...current, ...payload.errors }));
+        }
+
         throw new Error(payload.message || "No pudimos enviar el formulario.");
       }
 
+      setValues(initialValues);
+      setErrors({});
+      resetCaptcha();
       setStatus({
         type: "success",
         message:
           payload.message || "Gracias. Recibimos tus datos y te contactaremos pronto."
       });
-      setValues(initialValues);
-      setErrors({});
-      resetCaptcha();
     } catch (error) {
+      resetCaptcha();
       setStatus({
         type: "error",
         message:
           error.message ||
           "Hubo un problema al enviar el formulario. Intenta nuevamente."
       });
-      resetCaptcha();
     }
   };
 
@@ -240,51 +286,42 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
         </label>
       </div>
 
-      {turnstileSiteKey ? (
-        <div className="captcha-shell">
-          <TurnstileWidget
-            onError={(errorCode) => {
-              const readableCode = errorCode ? ` (codigo: ${errorCode})` : "";
-              setCaptchaToken("");
-              setCaptchaIssue(
-                `No pudimos cargar el captcha${readableCode}. Si estas en localhost, prueba reiniciar la app o abrir en incognito sin extensiones.`
-              );
-              setErrors((current) => ({
-                ...current,
-                captcha:
-                  "No pudimos inicializar el captcha. Revisa la site key, el dominio permitido y si alguna extension esta bloqueando Turnstile."
-              }));
-            }}
-            onExpire={() => {
-              setCaptchaToken("");
-              setCaptchaIssue("El captcha expiro. Haz clic en reintentar.");
-            }}
-            onVerify={(token) => {
-              setCaptchaToken(token);
-              setCaptchaIssue("");
-              setErrors((current) => ({ ...current, captcha: "" }));
-            }}
-            resetKey={captchaResetKey}
-            siteKey={turnstileSiteKey}
-            theme="light"
-          />
-          {errors.captcha ? <small className="field-error">{errors.captcha}</small> : null}
-          {captchaIssue ? (
-            <div className="captcha-meta">
-              <small className="form-helper">{captchaIssue}</small>
-              <button className="captcha-retry" onClick={resetCaptcha} type="button">
-                Reintentar captcha
-              </button>
-            </div>
-          ) : null}
-        </div>
-      ) : import.meta.env.DEV ? (
-        <p className="form-helper">
-          {useLocalTurnstileTestKey
-            ? "Turnstile esta usando la site key oficial de prueba para localhost."
-            : "Falta configurar `VITE_TURNSTILE_SITE_KEY` con la site key publica de Cloudflare Turnstile."}
-        </p>
-      ) : null}
+      <div className="captcha-block">
+        <p className="captcha-block__title">Protección anti-spam</p>
+        {isCaptchaConfigured ? (
+          <>
+            <TurnstileWidget
+              key={`${source}-${captchaVersion}-${captchaSize}`}
+              language="es"
+              onError={() => {
+                setCaptchaToken("");
+                setErrors((current) => ({
+                  ...current,
+                  captcha: "No pudimos validar el CAPTCHA. Intenta nuevamente."
+                }));
+              }}
+              onSuccess={(token) => {
+                setCaptchaToken(token || "");
+                setErrors((current) => ({ ...current, captcha: "" }));
+
+                if (status.type !== "idle") {
+                  setStatus({ type: "idle", message: "" });
+                }
+              }}
+              siteKey={captchaSiteKey}
+              size={captchaSize}
+              theme="light"
+            />
+            <p className="form-note">Protegido con Cloudflare Turnstile.</p>
+          </>
+        ) : (
+          <p className="form-note form-note--warning">
+            Configura `VITE_TURNSTILE_SITE_KEY` en el cliente y `TURNSTILE_SECRET_KEY`
+            en el servidor antes de publicar.
+          </p>
+        )}
+        {errors.captcha ? <small className="field-error">{errors.captcha}</small> : null}
+      </div>
 
       <button
         className="primary-button form-submit"

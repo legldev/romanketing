@@ -1,50 +1,57 @@
 import { useEffect, useEffectEvent, useRef } from "react";
 
-let turnstileScriptPromise;
-
 function loadTurnstileScript() {
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("Turnstile solo puede cargarse en el navegador."));
+    return Promise.reject(new Error("Turnstile no está disponible en el servidor."));
   }
 
-  if (window.turnstile) {
+  if (window.turnstile?.render) {
     return Promise.resolve(window.turnstile);
   }
 
-  if (!turnstileScriptPromise) {
-    turnstileScriptPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector("script[data-turnstile-script='true']");
-
-      if (existing) {
-        existing.addEventListener("load", () => resolve(window.turnstile), {
-          once: true
-        });
-        existing.addEventListener("error", () => reject(new Error("No se pudo cargar Turnstile.")), {
-          once: true
-        });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true;
-      script.defer = true;
-      script.dataset.turnstileScript = "true";
-      script.onload = () => resolve(window.turnstile);
-      script.onerror = () => reject(new Error("No se pudo cargar Turnstile."));
-      document.head.append(script);
-    });
+  if (window.__romanketingTurnstilePromise) {
+    return window.__romanketingTurnstilePromise;
   }
 
-  return turnstileScriptPromise;
+  window.__romanketingTurnstilePromise = new Promise((resolve, reject) => {
+    const existingScript = document.getElementById("romanketing-turnstile-script");
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => resolve(window.turnstile), {
+        once: true
+      });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("No se pudo cargar Turnstile.")),
+        { once: true }
+      );
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "romanketing-turnstile-script";
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve(window.turnstile);
+    script.onerror = () => reject(new Error("No se pudo cargar Turnstile."));
+    document.head.appendChild(script);
+  });
+
+  return window.__romanketingTurnstilePromise;
 }
 
-export function TurnstileWidget({ onError, onExpire, onVerify, resetKey, siteKey, theme }) {
+export function TurnstileWidget({
+  language = "es",
+  onError,
+  onSuccess,
+  siteKey,
+  size = "flexible",
+  theme = "light"
+}) {
   const containerRef = useRef(null);
-  const widgetIdRef = useRef(null);
-  const emitVerify = useEffectEvent((token) => onVerify?.(token));
-  const emitExpire = useEffectEvent(() => onExpire?.());
-  const emitError = useEffectEvent((errorCode) => onError?.(errorCode));
+  const handleSuccess = useEffectEvent((token) => onSuccess?.(token));
+  const handleError = useEffectEvent(() => onError?.());
 
   useEffect(() => {
     if (!siteKey || !containerRef.current) {
@@ -52,6 +59,7 @@ export function TurnstileWidget({ onError, onExpire, onVerify, resetKey, siteKey
     }
 
     let cancelled = false;
+    let widgetId;
 
     loadTurnstileScript()
       .then((turnstile) => {
@@ -59,33 +67,30 @@ export function TurnstileWidget({ onError, onExpire, onVerify, resetKey, siteKey
           return;
         }
 
-        containerRef.current.innerHTML = "";
-
-        widgetIdRef.current = turnstile.render(containerRef.current, {
+        widgetId = turnstile.render(containerRef.current, {
           sitekey: siteKey,
           theme,
-          size: "flexible",
-          retry: "never",
-          "refresh-expired": "manual",
-          callback: (token) => emitVerify(token),
-          "expired-callback": () => emitExpire(),
-          "error-callback": (errorCode) => {
-            emitError(errorCode);
-            return true;
-          }
+          language,
+          size,
+          "response-field": false,
+          callback: (token) => handleSuccess(token),
+          "expired-callback": () => handleError(),
+          "timeout-callback": () => handleError(),
+          "error-callback": () => handleError()
         });
       })
-      .catch(() => emitError("script-load-failed"));
+      .catch(() => {
+        handleError();
+      });
 
     return () => {
       cancelled = true;
 
-      if (widgetIdRef.current !== null && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
+      if (widgetId !== undefined && window.turnstile?.remove) {
+        window.turnstile.remove(widgetId);
       }
     };
-  }, [emitError, emitExpire, emitVerify, resetKey, siteKey, theme]);
+  }, [handleError, handleSuccess, language, siteKey, size, theme]);
 
-  return <div className="captcha-slot" ref={containerRef} />;
+  return <div className="turnstile-widget" ref={containerRef} />;
 }

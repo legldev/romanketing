@@ -4,7 +4,6 @@ import { google } from "googleapis";
 
 const defaultRecipientEmail = process.env.LEAD_RECIPIENT_EMAIL || "clientes@romanketing.com";
 const sheetName = process.env.GOOGLE_SHEET_TAB || "Leads";
-const TURNSTILE_TEST_SECRET_KEY = "1x0000000000000000000000000000000AA";
 const sheetHeader = [
   "Fecha de envío",
   "Origen",
@@ -57,7 +56,7 @@ function sanitizeLead(rawLead) {
     interest: normalizeValue(rawLead.interest) || "Optimización SEO",
     source: normalizeValue(rawLead.source) || "landing",
     website: normalizeValue(rawLead.website),
-    captchaToken: normalizeValue(rawLead.captchaToken)
+    captchaToken: normalizeValue(rawLead.token || rawLead.captchaToken)
   };
 
   const errors = {};
@@ -110,15 +109,14 @@ function getRemoteIp(headers = {}, explicitIp = "") {
 }
 
 async function verifyTurnstileToken(token, remoteIp) {
-  const useLocalTurnstileTestKey =
-    process.env.NODE_ENV !== "production" &&
-    process.env.TURNSTILE_ALLOW_LOCAL_PRODUCTION !== "true";
-  const secretKey = useLocalTurnstileTestKey
-    ? process.env.TURNSTILE_DEV_SECRET_KEY || TURNSTILE_TEST_SECRET_KEY
-    : process.env.TURNSTILE_SECRET_KEY;
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
-    return { ok: true };
+    return {
+      ok: false,
+      error: "missing_turnstile_secret",
+      errorCodes: ["missing-input-secret"]
+    };
   }
 
   if (!token) {
@@ -371,6 +369,13 @@ export async function handleLeadRequest({ method, headers, body, ip }) {
     });
   }
 
+  if (!process.env.TURNSTILE_SECRET_KEY) {
+    return jsonResponse(500, {
+      ok: false,
+      message: "El CAPTCHA no está configurado en el servidor."
+    });
+  }
+
   const captchaCheck = await verifyTurnstileToken(
     lead.captchaToken,
     getRemoteIp(headers, ip)
@@ -382,9 +387,12 @@ export async function handleLeadRequest({ method, headers, body, ip }) {
         ? ` (${captchaCheck.errorCodes.join(", ")})`
         : "";
 
-    return jsonResponse(400, {
+    return jsonResponse(captchaCheck.error === "missing_turnstile_secret" ? 500 : 400, {
       ok: false,
-      message: `No pudimos validar el captcha.${detail}`
+      message:
+        captchaCheck.error === "missing_turnstile_secret"
+          ? "El CAPTCHA no está configurado en el servidor."
+          : `No pudimos validar el CAPTCHA.${detail}`
     });
   }
 
