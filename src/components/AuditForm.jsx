@@ -229,7 +229,8 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
             onError={() =>
               setErrors((current) => ({
                 ...current,
-                captcha: "No pudimos validar el captcha. Intenta nuevamente."
+                captcha:
+                  "No pudimos inicializar el captcha. Revisa que VITE_TURNSTILE_SITE_KEY tenga la site key publica correcta y reinicia la app."
               }))
             }
             onExpire={() => setCaptchaToken("")}
@@ -245,7 +246,7 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
         </div>
       ) : import.meta.env.DEV ? (
         <p className="form-helper">
-          El captcha se activa al configurar las claves de Cloudflare Turnstile.
+          Falta configurar `VITE_TURNSTILE_SITE_KEY` con la site key publica de Cloudflare Turnstile.
         </p>
       ) : null}
 
