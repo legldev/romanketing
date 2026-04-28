@@ -407,6 +407,26 @@ img {
 
 .captcha-slot {
   min-height: 65px;
+  width: 100%;
+}
+
+.captcha-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.captcha-retry {
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
 }
 
 .form-helper,
@@ -1045,6 +1065,11 @@ img {
   .captcha-slot {
     min-height: 78px;
     overflow-x: auto;
+  }
+
+  .captcha-meta {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .services-section {

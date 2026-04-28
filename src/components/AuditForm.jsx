@@ -107,12 +107,20 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
   const [status, setStatus] = useState({ type: "idle", message: "" });
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [captchaIssue, setCaptchaIssue] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => ({ ...current, [name]: "" }));
     setStatus({ type: "idle", message: "" });
+  };
+
+  const resetCaptcha = () => {
+    setCaptchaToken("");
+    setCaptchaIssue("");
+    setErrors((current) => ({ ...current, captcha: "" }));
+    setCaptchaResetKey((current) => current + 1);
   };
 
   const handleSubmit = async (event) => {
@@ -153,8 +161,7 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
       });
       setValues(initialValues);
       setErrors({});
-      setCaptchaToken("");
-      setCaptchaResetKey((current) => current + 1);
+      resetCaptcha();
     } catch (error) {
       setStatus({
         type: "error",
@@ -162,8 +169,7 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
           error.message ||
           "Hubo un problema al enviar el formulario. Intenta nuevamente."
       });
-      setCaptchaToken("");
-      setCaptchaResetKey((current) => current + 1);
+      resetCaptcha();
     }
   };
 
@@ -237,16 +243,25 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
       {turnstileSiteKey ? (
         <div className="captcha-shell">
           <TurnstileWidget
-            onError={() =>
+            onError={(errorCode) => {
+              const readableCode = errorCode ? ` (codigo: ${errorCode})` : "";
+              setCaptchaToken("");
+              setCaptchaIssue(
+                `No pudimos cargar el captcha${readableCode}. Si estas en localhost, prueba reiniciar la app o abrir en incognito sin extensiones.`
+              );
               setErrors((current) => ({
                 ...current,
                 captcha:
-                  "No pudimos inicializar el captcha. Revisa que VITE_TURNSTILE_SITE_KEY tenga la site key publica correcta y reinicia la app."
-              }))
-            }
-            onExpire={() => setCaptchaToken("")}
+                  "No pudimos inicializar el captcha. Revisa la site key, el dominio permitido y si alguna extension esta bloqueando Turnstile."
+              }));
+            }}
+            onExpire={() => {
+              setCaptchaToken("");
+              setCaptchaIssue("El captcha expiro. Haz clic en reintentar.");
+            }}
             onVerify={(token) => {
               setCaptchaToken(token);
+              setCaptchaIssue("");
               setErrors((current) => ({ ...current, captcha: "" }));
             }}
             resetKey={captchaResetKey}
@@ -254,6 +269,14 @@ export function AuditForm({ title, description, buttonLabel, compact = false, so
             theme="light"
           />
           {errors.captcha ? <small className="field-error">{errors.captcha}</small> : null}
+          {captchaIssue ? (
+            <div className="captcha-meta">
+              <small className="form-helper">{captchaIssue}</small>
+              <button className="captcha-retry" onClick={resetCaptcha} type="button">
+                Reintentar captcha
+              </button>
+            </div>
+          ) : null}
         </div>
       ) : import.meta.env.DEV ? (
         <p className="form-helper">

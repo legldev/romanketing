@@ -44,7 +44,7 @@ export function TurnstileWidget({ onError, onExpire, onVerify, resetKey, siteKey
   const widgetIdRef = useRef(null);
   const emitVerify = useEffectEvent((token) => onVerify?.(token));
   const emitExpire = useEffectEvent(() => onExpire?.());
-  const emitError = useEffectEvent(() => onError?.());
+  const emitError = useEffectEvent((errorCode) => onError?.(errorCode));
 
   useEffect(() => {
     if (!siteKey || !containerRef.current) {
@@ -64,12 +64,18 @@ export function TurnstileWidget({ onError, onExpire, onVerify, resetKey, siteKey
         widgetIdRef.current = turnstile.render(containerRef.current, {
           sitekey: siteKey,
           theme,
+          size: "flexible",
+          retry: "never",
+          "refresh-expired": "manual",
           callback: (token) => emitVerify(token),
           "expired-callback": () => emitExpire(),
-          "error-callback": () => emitError()
+          "error-callback": (errorCode) => {
+            emitError(errorCode);
+            return true;
+          }
         });
       })
-      .catch(() => emitError());
+      .catch(() => emitError("script-load-failed"));
 
     return () => {
       cancelled = true;
